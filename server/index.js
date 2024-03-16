@@ -51,6 +51,7 @@ io.on("connection", (socket) => {
     socket.leave(RoomID);
     console.log("leave");
     socket.to(RoomID).emit("user disconnected", socket.id);
+    console.log("user disconnected", RoomID);
   })
 
   socket.on("join room", (RoomID) => {
