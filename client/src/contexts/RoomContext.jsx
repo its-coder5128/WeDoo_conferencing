@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { v4 as uuid } from "uuid";
 import { useNavigate } from "react-router";
+import Peer from "simple-peer";
 
 const socket = io("http://localhost:4000", {
   autoConnect: false
@@ -13,43 +14,61 @@ export const RoomProvider = ({children}) => {
 
     const navigate = useNavigate();
 
+    const [name,setName] = useState("User");
+    const [throughtTheFlow,setThroughtTheFlow] = useState(false);
     const [me,setMe] = useState("");
     const [alert,setAlert] = useState("");
     const [ isAlertVisible, setIsAlertVisible ] = useState(false);
 
+    
     useEffect(()=>{
-        socket.connect();
         const settingMe = (id)=>{
             setMe(id);
         }
+        const roomFull = ()=>{
+            console.log("room full");
+            setIsAlertVisible(true);
+            const msg = `Room Full`;
+            setAlert(msg);
 
+            setTimeout(() => {
+                setIsAlertVisible(false);
+                setAlert("");
+                navigate("/");
+            }, "2000");
+        }
+
+        socket.connect();
         socket.on("me", settingMe)
-
+        socket.on("room full",roomFull);
         return () => {
             socket.disconnect();
             socket.off("me", settingMe)
+            socket.off("room full",roomFull);
         } 
              
     },[])
 
-    useEffect(() => {
-        console.log("me",me);
-    },[me])
 
-    const joinRoom = (RoomID,e)=>{
+    const joinRoom = (RoomID,name,e)=>{
         e.preventDefault();
+        setThroughtTheFlow(true);
+        setName(name);
         console.log("join room func");
         navigate(`/room/${RoomID}`);
     }
-    const CreateRoom = () => {
+    const CreateRoom = (name) => {
+        setThroughtTheFlow(true);
+        setName(name);
         const RoomID = uuid().slice(0, 8);
         console.log("join room func");
         navigate(`/room/${RoomID}`);
     }
     const leaveRoom = (RoomID)=>{
-        console.log("leave room func", RoomID);
-        socket.emit("leave room", RoomID);
+        // console.log("leave room func", RoomID);
+        socket.emit("leave room");
         navigate("/");
+        window.location.reload();
     }
     const newUserConnected = (id) => {
         console.log("new user joined the room", id);
@@ -86,12 +105,49 @@ export const RoomProvider = ({children}) => {
             setAlert("");
         }, "2000");
     }
+    const createPeer = (userToSignal, callerID, stream) => {
+        const peer = new Peer({
+            initiator: true,
+            trickle: false,
+            stream: stream,
+        });
 
+        peer.on("signal", signal => {
+            socket.emit("sending signal", { userToSignal, callerID, signal })
+        })
+
+        return peer;
+    }
+
+    const addPeer = (incomingSignal, callerID, stream) => {
+        const peer = new Peer({
+            initiator: false,
+            trickle: false,
+            stream: stream,
+        })
+
+        peer.on("signal", signal => {
+            socket.emit("returning signal", { signal, callerID })
+        })
+
+        peer.signal(incomingSignal);
+
+        return peer;
+    }
+    const myName = (info) => {
+        setName(info);
+    }
+    
     const RoomData ={
         me,
+        name,
         socket,
         isAlertVisible,
         alert,
+        throughtTheFlow,
+        myName,
+        addPeer,
+        createPeer,
         joinRoom,
         CreateRoom,
         leaveRoom,

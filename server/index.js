@@ -26,6 +26,12 @@ const io = new Server(server, {
   },
 });
 
+const users = {};
+
+const socketToRoom = {};
+
+const idToName = {};
+
 io.on("connection", (socket) => {
     
   console.log("user connected", socket.id)
@@ -34,7 +40,14 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
       console.log("user disconnected",socket.id);
-    });
+      const roomID = socketToRoom[socket.id];
+      let room = users[roomID];
+      if (room) {
+          room = room.filter(id => id !== socket.id);
+          users[roomID] = room;
+      }
+      socket.to(room).emit("user left", socket.id);
+  });
     
     socket.on('disconnecting', () => {
         var rooms = socket.rooms;
@@ -47,18 +60,52 @@ io.on("connection", (socket) => {
         
   });
 
-  socket.on("leave room", (RoomID) => {
+  socket.on("leave room", () => {
+    const RoomID = socketToRoom[socket.id];
     socket.leave(RoomID);
     console.log("leave");
+
+    const roomID = socketToRoom[socket.id];
+    let room = users[roomID];
+    if (room) {
+        room = room.filter(id => id !== socket.id);
+        users[roomID] = room;
+    }
+    socket.to(room).emit("user left", socket.id);
+
     socket.to(RoomID).emit("user disconnected", socket.id);
     console.log("user disconnected", RoomID);
   })
 
-  socket.on("join room", (RoomID) => {
+  socket.on("join room", ({RoomID,name}) => {
+    idToName[socket.id] = name;
+    socket.to(RoomID).emit("new user", socket.id);
+    if (users[RoomID]) {
+      const length = users[RoomID].length;
+      if (length === 4) {
+        socket.emit("room full");
+        return;
+      }
+        users[RoomID].push(socket.id);
+    } else {
+      users[RoomID] = [socket.id];
+    }
     socket.join(RoomID);
     console.log("join");
-    socket.to(RoomID).emit("new user", socket.id);
+    socketToRoom[socket.id] = RoomID;
+    
+    const usersInThisRoom = users[RoomID].filter(id => id !== socket.id);
+
+    socket.emit("all users", {usersInThisRoom,idToName});
   })
+  
+  socket.on("sending signal", payload => {
+    io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID, name: idToName[socket.id] });
+  });
+
+  socket.on("returning signal", payload => {
+    io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
+  });
 
   socket.on("msg",(data)=>{
     console.log("msg");

@@ -1,3 +1,4 @@
+import * as process from 'process';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -6,6 +7,12 @@ import { RouterProvider,createBrowserRouter,createRoutesFromElements,Route } fro
 import CreateRoom from './pages/CreateRoom';
 import Room from './pages/Room';
 import BaseLayout from './layouts/BaseLayout';
+import FlowCtrl from './layouts/FlowCtrl'
+
+window.global = window;
+window.process = process;
+window.Buffer = [];
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -13,7 +20,10 @@ const router = createBrowserRouter(
       <Route path="/" >
         <Route path='' element={<BaseLayout/>}>
           <Route index element={<CreateRoom/>}/>
-          <Route path='room/:RoomID' element={<Room/>}/>
+          
+          <Route path='' element={<FlowCtrl/>}>
+            <Route path='room/:RoomID' element={<Room/>}/>
+          </Route>
         </Route>
       </Route>
     </Route>
