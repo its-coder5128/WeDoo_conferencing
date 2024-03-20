@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 app.use(cors({
-  origin: 'Wss://we-doo-conferencing-client.vercel.app'
+  origin: 'https://we-doo-conferencing-client.vercel.app'
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,7 +23,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "wss://we-doo-conferencing-client.vercel.app",
+    origin: "https://we-doo-conferencing-client.vercel.app",
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true
