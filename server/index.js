@@ -25,7 +25,6 @@ const io = new Server(server, {
   cors: {
     origin: "https://we-doo-conferencing-client.vercel.app",
     methods: ["GET", "POST"],
-    allowedHeaders: ["my-custom-header"],
     credentials: true
   },
 });

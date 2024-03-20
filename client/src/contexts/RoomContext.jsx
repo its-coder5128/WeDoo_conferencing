@@ -13,9 +13,6 @@ export const RoomProvider = ({children}) => {
     const socket = io("https://we-doo-conferencing-server.vercel.app", {
         autoConnect: false,
         withCredentials: true,
-        extraHeaders: {
-            "my-custom-header": "abcd"
-        }
     });
 
     const [name,setName] = useState("User");
