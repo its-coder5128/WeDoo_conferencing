@@ -10,7 +10,7 @@ export const RoomProvider = ({children}) => {
 
     const navigate = useNavigate();
 
-    const socket = io("https://we-doo-conferencing-server.vercel.app", {
+    const socket = io("wss://we-doo-conferencing-server.vercel.app", {
         autoConnect: false,
         withCredentials: true,
         extraHeaders: {
