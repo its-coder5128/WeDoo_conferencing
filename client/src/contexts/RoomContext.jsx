@@ -4,16 +4,17 @@ import { v4 as uuid } from "uuid";
 import { useNavigate } from "react-router";
 import Peer from "simple-peer";
 
+const socket = io("https://we-doo-conferencing-server.vercel.app", {
+    autoConnect: false,
+    withCredentials: true,
+});
+
 const roomContext = createContext()
 
 export const RoomProvider = ({children}) => {
 
     const navigate = useNavigate();
 
-    const socket = io("https://we-doo-conferencing-server.vercel.app", {
-        autoConnect: false,
-        withCredentials: true,
-    });
 
     const [name,setName] = useState("User");
     const [throughtTheFlow,setThroughtTheFlow] = useState(false);
