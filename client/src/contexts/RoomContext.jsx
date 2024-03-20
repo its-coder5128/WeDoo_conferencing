@@ -4,8 +4,12 @@ import { v4 as uuid } from "uuid";
 import { useNavigate } from "react-router";
 import Peer from "simple-peer";
 
-const socket = io("https://we-doo-conferencing-server.vercel.app/", {
-  autoConnect: false
+const socket = io("https://we-doo-conferencing-server.vercel.app", {
+  autoConnect: false,
+  withCredentials: true,
+  extraHeaders: {
+    "my-custom-header": "abcd"
+  }
 });
 
 const roomContext = createContext()
