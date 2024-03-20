@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 import { useNavigate } from "react-router";
 import Peer from "simple-peer";
 
-const socket = io("http://localhost:4000", {
+const socket = io("https://we-doo-conferencing-server.vercel.app/", {
   autoConnect: false
 });
 
