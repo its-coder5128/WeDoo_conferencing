@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
+import http from 'http';
 
 dotenv.config();
 const app = express();
@@ -14,18 +15,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.get("/",(req,res)=>{
     return res.send("THIS IS BACKEND")
 })
 
-const server = app.listen(port,()=>{
-    console.log("listening at port", port);
-})
+const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin:[ "https://we-doo-conferencing-client.vercel.app"],
+    origin: "https://we-doo-conferencing-client.vercel.app",
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true
@@ -33,13 +31,10 @@ const io = new Server(server, {
 });
 
 const users = {};
-
 const socketToRoom = {};
-
 const idToName = {};
 
 io.on("connection", (socket) => {
-
   socket.emit("me", socket.id);
 
   socket.on("disconnect", () => {
@@ -49,36 +44,32 @@ io.on("connection", (socket) => {
           room = room.filter(id => id !== socket.id);
           users[roomID] = room;
       }
-      socket.to(room).emit("user left", socket.id);
+      socket.to(roomID).emit("user left", socket.id);
   });
     
-    socket.on('disconnecting', () => {
-        var rooms = socket.rooms;
-        
-        rooms.forEach(function(room){
-            if(room != socket.id){
-                socket.to(room).emit("user disconnected", socket.id);
-            }
-        });
-        
+  socket.on('disconnecting', () => {
+    const rooms = Object.keys(socket.rooms);
+    rooms.forEach(room => {
+      if(room != socket.id){
+          socket.to(room).emit("user disconnected", socket.id);
+      }
+    });
   });
 
   socket.on("leave room", () => {
-    const RoomID = socketToRoom[socket.id];
-    socket.leave(RoomID);
-
     const roomID = socketToRoom[socket.id];
+    socket.leave(roomID);
+
     let room = users[roomID];
     if (room) {
         room = room.filter(id => id !== socket.id);
         users[roomID] = room;
     }
-    socket.to(room).emit("user left", socket.id);
+    socket.to(roomID).emit("user left", socket.id);
+    socket.to(roomID).emit("user disconnected", socket.id);
+  });
 
-    socket.to(RoomID).emit("user disconnected", socket.id);
-  })
-
-  socket.on("join room", ({RoomID,name}) => {
+  socket.on("join room", ({ RoomID, name }) => {
     idToName[socket.id] = name;
     socket.to(RoomID).emit("new user", socket.id);
     if (users[RoomID]) {
@@ -87,7 +78,7 @@ io.on("connection", (socket) => {
         socket.emit("room full");
         return;
       }
-        users[RoomID].push(socket.id);
+      users[RoomID].push(socket.id);
     } else {
       users[RoomID] = [socket.id];
     }
@@ -97,8 +88,8 @@ io.on("connection", (socket) => {
     
     const usersInThisRoom = users[RoomID].filter(id => id !== socket.id);
 
-    socket.emit("all users", {usersInThisRoom,idToName});
-  })
+    socket.emit("all users", { usersInThisRoom, idToName });
+  });
   
   socket.on("sending signal", payload => {
     io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID, name: idToName[socket.id] });
@@ -108,8 +99,11 @@ io.on("connection", (socket) => {
     io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
   });
 
-  socket.on("msg",(data)=>{
+  socket.on("msg", (data) => {
     io.to(data.room).emit("msg", data.data);
-  })
-  
+  });
+});
+
+server.listen(port, () => {
+  console.log("listening at port", port);
 });
