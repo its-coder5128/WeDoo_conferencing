@@ -11,7 +11,7 @@ import Video from '../components/Video.jsx';
 
 function Room() {
     const {RoomID} = useParams();
-    const {throughtTheFlow,name,createPeer,addPeer,isAlertVisible,alert,socket,leaveRoom,userDisconnected,newUserConnected,clipboardFun} = useRoom();
+    const {throughtTheFlow,name,createPeer,addPeer,isAlertVisible,alert,socket,userDisconnected,newUserConnected,clipboardFun} = useRoom();
 
     const [chat,setChat] = useState(false);
     const [idToName,setIdToName] = useState({});
@@ -38,12 +38,10 @@ function Room() {
     useEffect(() => {
         socket.on("new user", newUserConnected);
         socket.on("user disconnected",userDisconnected);
-        // socket.emit("join room", RoomID);
         
         if(!inititalise.current && throughtTheFlow)
         {
             inititalise.current = true;
-            console.log("i fire once");
             navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true }).then(stream => {
                 setStream(stream);
                 if(userVideo.current)
@@ -51,7 +49,6 @@ function Room() {
                 socket.emit("join room", {RoomID,name});
                 socket.on("all users", ({usersInThisRoom,idToName}) => {
                     setIdToName(idToName);
-                    console.log("before",usersInThisRoom,idToName);
                     const peers = [];
                     usersInThisRoom.forEach(userID => {
                         console.log("uID",userID);
@@ -69,7 +66,6 @@ function Room() {
                         setPeers(peers);
                     })
                     
-                    console.log("after",idToName);
                     socket.on("user joined", payload => {
                         const peer = addPeer(payload.signal, payload.callerID, stream);
                     peersRef.current.push({
@@ -91,13 +87,11 @@ function Room() {
                 });
 
                 socket.on("user left",(id) => {
-                    console.log("user left", id);
                     const item = peersRef.current.find(p => p.peerID === id);
                     if(item){
                         item.peer.destroy();
                     }
                     const peer = peersRef.current.filter(p => p.peerID !== id);
-                    console.log(peer)
                     peersRef.current = peer;
                     setPeers(peer);
                 })

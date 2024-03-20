@@ -1,7 +1,9 @@
+import dotenv from 'dotenv';
 import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
 
+dotenv.config();
 const app = express();
 
 const port = process.env.PORT || 4000;
@@ -33,13 +35,10 @@ const socketToRoom = {};
 const idToName = {};
 
 io.on("connection", (socket) => {
-    
-  console.log("user connected", socket.id)
 
   socket.emit("me", socket.id);
 
   socket.on("disconnect", () => {
-      console.log("user disconnected",socket.id);
       const roomID = socketToRoom[socket.id];
       let room = users[roomID];
       if (room) {
@@ -63,7 +62,6 @@ io.on("connection", (socket) => {
   socket.on("leave room", () => {
     const RoomID = socketToRoom[socket.id];
     socket.leave(RoomID);
-    console.log("leave");
 
     const roomID = socketToRoom[socket.id];
     let room = users[roomID];
@@ -74,7 +72,6 @@ io.on("connection", (socket) => {
     socket.to(room).emit("user left", socket.id);
 
     socket.to(RoomID).emit("user disconnected", socket.id);
-    console.log("user disconnected", RoomID);
   })
 
   socket.on("join room", ({RoomID,name}) => {
@@ -108,7 +105,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("msg",(data)=>{
-    console.log("msg");
     io.to(data.room).emit("msg", data.data);
   })
   

@@ -5,8 +5,6 @@ import WeDoo from "../WeDoo.png"
 import WeDooLite from "../WeDoo_lite.png"
 
 function CreateRoom() {
-
-  const navigate = useNavigate();
   const [rid,setRID] = useState("");
   const [name,setName] = useState("");
   const [err,setErr] = useState(false);
@@ -37,6 +35,7 @@ function CreateRoom() {
         <header className=" w-full bg-slate-800">
           <img className=" h-24" src={WeDooLite} alt="logo" class=" p-0 m-0 scale-50" />
         </header>
+        
         <div className=" flex flex-col justify-center items-center max-w-xl mx-auto my-auto">
           {err?<span className=" text-red-600">Please Enter the Name</span>:null}
           <div className=" w-1/2">

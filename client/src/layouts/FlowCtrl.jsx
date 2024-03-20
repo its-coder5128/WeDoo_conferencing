@@ -11,13 +11,12 @@ function BaseLayout(){
         return ()=>{
             if(!throughtTheFlow)
             {
-                // console.log("leave room func", RoomID);
                 socket.emit("leave room");
                 setTimeout(()=>{
                     setLoading(true);
                     navigate("/");
                     window.location.reload();
-                },"2000")
+                },"1000")
             }
             else
                 setLoading(true);

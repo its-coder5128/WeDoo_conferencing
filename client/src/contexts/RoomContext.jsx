@@ -26,7 +26,6 @@ export const RoomProvider = ({children}) => {
             setMe(id);
         }
         const roomFull = ()=>{
-            console.log("room full");
             setIsAlertVisible(true);
             const msg = `Room Full`;
             setAlert(msg);
@@ -54,24 +53,20 @@ export const RoomProvider = ({children}) => {
         e.preventDefault();
         setThroughtTheFlow(true);
         setName(name);
-        console.log("join room func");
         navigate(`/room/${RoomID}`);
     }
     const CreateRoom = (name) => {
         setThroughtTheFlow(true);
         setName(name);
         const RoomID = uuid().slice(0, 8);
-        console.log("join room func");
         navigate(`/room/${RoomID}`);
     }
     const leaveRoom = (RoomID)=>{
-        // console.log("leave room func", RoomID);
         socket.emit("leave room");
         navigate("/");
         window.location.reload();
     }
     const newUserConnected = (id) => {
-        console.log("new user joined the room", id);
         setIsAlertVisible(true);
         const msg = `new user joined the room ${id}`;
         setAlert(msg);
@@ -83,7 +78,6 @@ export const RoomProvider = ({children}) => {
             
     };
     const userDisconnected = (id) => {
-        console.log("user disconnected", id);
         setIsAlertVisible(true);
         const msg = `User disconnected ${id}`;
         setAlert(msg);
@@ -95,7 +89,6 @@ export const RoomProvider = ({children}) => {
     };
     const clipboardFun = (RoomID) => {
         navigator.clipboard.writeText(RoomID);
-        console.log("Copied to Clipboard");
         setIsAlertVisible(true);
         const msg = "Copied to Clipboard";
         setAlert(msg);
