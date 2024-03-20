@@ -8,7 +8,9 @@ const app = express();
 
 const port = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://we-doo-conferencing-client.vercel.app'
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
