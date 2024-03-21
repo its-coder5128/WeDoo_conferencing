@@ -3,7 +3,7 @@ import {Outlet} from 'react-router-dom'
 import { useRoom } from '../contexts/RoomContext.jsx';
 import { useNavigate } from "react-router";
 
-function BaseLayout(){
+function FlowCtrl(){
     const {throughtTheFlow,socket} = useRoom();
     const [loading,setLoading] = useState(false);
     const navigate = useNavigate();
@@ -25,9 +25,8 @@ function BaseLayout(){
   return (
         <div className=' w-full h-screen'>
             {loading?<Outlet/>:<strong>loading...</strong>}
-            
         </div>
   )
 }
 
-export default BaseLayout
+export default FlowCtrl
