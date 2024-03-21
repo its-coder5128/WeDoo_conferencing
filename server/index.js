@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
 import http from 'http';
+import path from 'path';
 
 dotenv.config();
 const app = express();
@@ -15,10 +16,6 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.get("/",(req,res)=>{
-    return res.send("THIS IS BACKEND")
-})
 
 const server = http.createServer(app);
 
