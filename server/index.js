@@ -11,17 +11,32 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 app.use(cors({
-  origin: "https://we-doo-conferencing-client.vercel.app",
+  origin: "http://localhost:3000",
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+const __dirname1 = path.resolve();
+if(process.env.NODE_ENV === "production")
+{
+  app.use(express.static(path.join(__dirname1,"../client/build")));
+  app.get("*",(req,res) => {
+    res.sendFile(path.resolve(__dirname1,"../client/build/index.html"));
+  })
+}
+else{
+    app.get("/",(req,res)=>{
+        return res.send("THIS IS BACKEND")
+    })
+}
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://we-doo-conferencing-client.vercel.app",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"],
     credentials: true
   },
