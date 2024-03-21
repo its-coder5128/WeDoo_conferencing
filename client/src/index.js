@@ -20,10 +20,7 @@ const router = createBrowserRouter(
       <Route path="/" >
         <Route path='' element={<BaseLayout/>}>
           <Route index element={<CreateRoom/>}/>
-          
-          <Route path='' element={<FlowCtrl/>}>
             <Route path='room/:RoomID' element={<Room/>}/>
-          </Route>
         </Route>
       </Route>
     </Route>
